@@ -1,6 +1,7 @@
 package pers.caijx.java8.tutorial.stream;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -16,9 +17,36 @@ public class parallelStreamTest {
 
 //        parallelStreamTest3();
 
+//        parallelStreamTest4();
+
     }
 
-//    sort 看起来只在主线程上串行执行。实际上，并行流上的 sort 在背后使用了
+//    控制台的输出表明，累加器和组合器都在所有可用的线程上并行执行：
+    public static void parallelStreamTest4() {
+        List<Person> persons = Arrays.asList(
+                new Person("Max",18),
+                new Person("Peter",33),
+                new Person("Pamela",53),
+                new Person("David",12),
+                new Person("caijx",23)
+        );
+
+        persons
+                .parallelStream()
+                .reduce(0,
+                        (sum,p) -> {
+                            System.out.format("accumulator: sum=%s;person=%s [%s]\n",
+                                    sum,p,Thread.currentThread().getName());
+                            return sum += p.age;
+                        },
+                        (sum1,sum2) -> {
+                            System.out.format("combiner: sum1=%s; sum2=%s [%s]\n",
+                                    sum1,sum2,Thread.currentThread().getName());
+                            return sum1 + sum2;
+                        });
+    }
+
+    //    sort 看起来只在主线程上串行执行。实际上，并行流上的 sort 在背后使用了
 //    Java8中新的方法 Arrays.parallelSort() 。如javadoc所说，这个方法会参照数
 //            据长度来决定以串行或并行来执行
     public static void parallelStreamTest3() {
