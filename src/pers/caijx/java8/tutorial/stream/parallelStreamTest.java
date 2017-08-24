@@ -14,9 +14,36 @@ public class parallelStreamTest {
 
 //        parallelStreamTest2();
 
+//        parallelStreamTest3();
+
     }
 
-//    打印了当前线程的信息
+//    sort 看起来只在主线程上串行执行。实际上，并行流上的 sort 在背后使用了
+//    Java8中新的方法 Arrays.parallelSort() 。如javadoc所说，这个方法会参照数
+//            据长度来决定以串行或并行来执行
+    public static void parallelStreamTest3() {
+        Arrays.asList("a1","a2","b1","c2","c1")
+                .parallelStream()
+                .filter(s -> {
+                    System.out.format("filter: %s [%s] \n",
+                            s,Thread.currentThread().getName());
+                    return true;
+                })
+                .map(s -> {
+                    System.out.format("map: %s [%s]\n",
+                            s,Thread.currentThread().getName());
+                    return s.toUpperCase();
+                })
+                .sorted((s1,s2) -> {
+                    System.out.format("sort: %s <> %s [%s]\n",
+                            s1,s2,Thread.currentThread().getName());
+                    return s1.compareTo(s2);
+                })
+                .forEach(s -> System.out.format("forEach: %s [%s]\n",
+                        s,Thread.currentThread().getName()));
+    }
+
+    //    打印了当前线程的信息
     public static void parallelStreamTest2() {
         Arrays.asList("a1","a2","b1","c2")
                 .parallelStream()
